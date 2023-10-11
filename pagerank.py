@@ -69,10 +69,20 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+
+    # init
     vis = {}
     for name in corpus:
         vis[name]=0
-    
+    # choose first page randomly
+    page = random.choice(list(vis))
+    vis[page]+=1
+
+    for i in range(0,n-1):
+        # write into the transition_model
+        transModel = transition_model(page,page,damping_factor)
+
+        
 
     raise NotImplementedError
 
