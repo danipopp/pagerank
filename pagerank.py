@@ -9,8 +9,8 @@ SAMPLES = 10000
 
 def main():
     #if len(sys.argv) != 2:
-    #    sys.exit("Usage: python pagerank.py corpus")
-    corpus = crawl('c:\\Users\\d-pop\\Documents\\CS50\\pagerank\\corpus0')
+        #sys.exit("Usage: python pagerank.py corpus")
+    corpus = crawl("corpus1")#crawl(sys.argv[1])
     ranks = sample_pagerank(corpus, DAMPING, SAMPLES)
     print(f"PageRank Results from Sampling (n = {SAMPLES})")
     for page in sorted(ranks):
@@ -69,6 +69,11 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+    vis = {}
+    for name in corpus:
+        vis[name]=0
+    
+
     raise NotImplementedError
 
 
