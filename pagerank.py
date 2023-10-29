@@ -10,7 +10,7 @@ SAMPLES = 10000
 def main():
     #if len(sys.argv) != 2:
         #sys.exit("Usage: python pagerank.py corpus")
-    corpus = crawl("corpus1")#crawl(sys.argv[1])
+    corpus = crawl("corpus2")#crawl(sys.argv[1])
     ranks = sample_pagerank(corpus, DAMPING, SAMPLES)
     print(f"PageRank Results from Sampling (n = {SAMPLES})")
     for page in sorted(ranks):
@@ -72,7 +72,7 @@ def transition_model(corpus, page, damping_factor):
     randoms = (1-damping_factor)/len(corpus)
 
     # picking link
-    links = damping_factor/len(corpus)
+    links = damping_factor/len(corpus[page])
 
     # add prob
     for name in vis:
@@ -104,19 +104,27 @@ def sample_pagerank(corpus, damping_factor, n):
 
     for i in range(0,n-1):
         # write into the transition_model
-        transModel = transition_model(page,page,damping_factor)
+        transModel = transition_model(corpus,page,damping_factor)
 
         # pick a random page
         ran=random.random()
         prob=0
 
-        for name,proba in vis.items():
-            prob+= proba
+        for name,proba in transModel.items():
+            prob+=proba
             if ran<=prob:
                 page=name
                 break
 
         vis[page]+=1
+
+    ranks = {}
+    for name, numVis in vis.items():
+        ranks[name]=numVis/n
+
+    print('Sum of sample page ranks: ', round(sum(ranks.values()), 4))
+
+    return ranks
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -128,7 +136,42 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    
+    ranks = {}
+    for name in corpus:
+        ranks[name]=1/len(corpus)
+    nranks = {}
+    for name in corpus:
+        nranks[name]=None
+
+    runs = 0
+    mrc = 1/len(corpus)
+    while mrc > 0.001:
+        runs+=1
+        mrc = 0
+    
+        for name in corpus:
+            prob = 0
+            for nextName in corpus:
+                if len(corpus[nextName])==0:
+                    prob+=ranks[nextName]*(1/len(corpus))
+                elif name in corpus[nextName]:
+                    prob+=ranks[nextName]/len(corpus[nextName])
+            nRank = ((1 - damping_factor) / len(corpus)) + (damping_factor * prob)
+            nranks[name]=nRank
+        
+        nFaktor = sum(nranks.values())
+        for name,rank in nranks.items():
+            nranks[name]=rank/nFaktor
+        
+        for name in corpus:
+            rchange=abs(ranks[name]-nranks[name])
+            if rchange > mrc:
+                mrc = rchange
+        
+        ranks = nranks.copy()
+
+    return ranks
 
 
 if __name__ == "__main__":
